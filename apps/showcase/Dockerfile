@@ -24,6 +24,7 @@ RUN pnpm --filter primevue build
 RUN pnpm --filter @primevue/core build
 RUN pnpm --filter @primevue/forms build
 RUN pnpm --filter themes build
+RUN pnpm --filter @primevue/auto-import-resolver build
 RUN pnpm --filter @primevue/nuxt-module build
 
 # Build showcase
