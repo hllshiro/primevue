@@ -1,0 +1,12 @@
+node_modules
+.nuxt
+.output
+dist
+.git
+.github
+.vscode
+*.log
+.DS_Store
+coverage
+.env
+.env.local

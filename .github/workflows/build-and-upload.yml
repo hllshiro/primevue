@@ -1,0 +1,71 @@
+name: Build Showcase Docker Image
+
+on:
+    workflow_dispatch:
+        inputs:
+            tag:
+                description: 'Docker image tag'
+                required: false
+                default: 'latest'
+                type: string
+
+permissions:
+    contents: read
+    packages: write
+
+jobs:
+    build-and-push:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Log in to GitHub Container Registry
+              uses: docker/login-action@v3
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Set image tag
+              id: tag
+              run: |
+                  TAG="${{ github.event.inputs.tag || 'latest' }}"
+                  REPO_OWNER="${{ github.repository_owner }}"
+                  echo "tag=${TAG}" >> $GITHUB_OUTPUT
+                  echo "image=ghcr.io/${REPO_OWNER}/primevue-showcase:${TAG}" >> $GITHUB_OUTPUT
+
+            - name: Build and push Docker image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: ./apps/showcase/Dockerfile
+                  push: true
+                  tags: ${{ steps.tag.outputs.image }}
+                  labels: |
+                      org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+                      org.opencontainers.image.revision=${{ github.sha }}
+                      org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
+                  build-args: |
+                      NODE_VERSION=20
+
+            - name: Output image info
+              run: |
+                  echo "✅ Docker image built and pushed successfully!"
+                  echo "📦 Image: ${{ steps.tag.outputs.image }}"
+                  echo "🔗 Pull command: docker pull ${{ steps.tag.outputs.image }}"
+
+            - name: Upload build artifacts (fallback)
+              uses: actions/upload-artifact@v4
+              if: failure()
+              with:
+                  name: showcase-build-${{ github.sha }}
+                  path: apps/showcase/.output
+                  retention-days: 7
+                  if-no-files-found: warn
