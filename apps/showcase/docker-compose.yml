@@ -2,12 +2,7 @@ version: '3.8'
 
 services:
     showcase:
-        # 使用本地构建
-        build:
-            context: ../..
-            dockerfile: ./apps/showcase/Dockerfile
-        # 或使用已发布的镜像（取消注释下面一行，注释掉 build 部分）
-        # image: ghcr.io/hllshiro/primevue-showcase:latest
+        image: ghcr.io/hllshiro/primevue-showcase:latest
         ports:
             - '3000:3000'
         environment:
