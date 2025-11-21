@@ -64,6 +64,7 @@ docker pull ghcr.io/hllshiro/primevue-showcase:latest
 ```
 
 创建 Personal Access Token：
+
 1. GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
 2. 勾选 `read:packages` 权限
 3. 生成并保存 token
@@ -97,50 +98,51 @@ server {
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: primevue-showcase
+    name: primevue-showcase
 spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: primevue-showcase
-  template:
-    metadata:
-      labels:
-        app: primevue-showcase
-    spec:
-      # 如果镜像是私有的，需要配置 imagePullSecrets
-      # imagePullSecrets:
-      # - name: ghcr-secret
-      containers:
-      - name: showcase
-        image: ghcr.io/hllshiro/primevue-showcase:latest
-        ports:
-        - containerPort: 3000
-        env:
-        - name: NODE_ENV
-          value: "production"
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
+    replicas: 2
+    selector:
+        matchLabels:
+            app: primevue-showcase
+    template:
+        metadata:
+            labels:
+                app: primevue-showcase
+        spec:
+            # 如果镜像是私有的，需要配置 imagePullSecrets
+            # imagePullSecrets:
+            # - name: ghcr-secret
+            containers:
+                - name: showcase
+                  image: ghcr.io/hllshiro/primevue-showcase:latest
+                  ports:
+                      - containerPort: 3000
+                  env:
+                      - name: NODE_ENV
+                        value: 'production'
+                  resources:
+                      requests:
+                          memory: '512Mi'
+                          cpu: '250m'
+                      limits:
+                          memory: '1Gi'
+                          cpu: '500m'
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: primevue-showcase
+    name: primevue-showcase
 spec:
-  selector:
-    app: primevue-showcase
-  ports:
-  - port: 80
-    targetPort: 3000
-  type: LoadBalancer
+    selector:
+        app: primevue-showcase
+    ports:
+        - port: 80
+          targetPort: 3000
+    type: LoadBalancer
 ```
 
 创建 Kubernetes Secret（如果镜像是私有的）：
+
 ```bash
 kubectl create secret docker-registry ghcr-secret \
   --docker-server=ghcr.io \
@@ -158,16 +160,19 @@ kubectl create secret docker-registry ghcr-secret \
 ## 故障排查
 
 ### 查看容器日志
+
 ```bash
 docker logs primevue-showcase
 ```
 
 ### 进入容器调试
+
 ```bash
 docker exec -it primevue-showcase sh
 ```
 
 ### 检查健康状态
+
 ```bash
 curl http://localhost:3000
 ```
