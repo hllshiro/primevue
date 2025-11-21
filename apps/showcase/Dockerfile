@@ -19,16 +19,18 @@ COPY scripts/ ./scripts/
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build dependencies first
-RUN pnpm --filter primevue build
-RUN pnpm --filter @primevue/core build
-RUN pnpm --filter @primevue/forms build
-RUN pnpm --filter themes build
-RUN pnpm --filter @primevue/auto-import-resolver build
-RUN pnpm --filter @primevue/nuxt-module build
+# Build all packages in dependency order
+RUN pnpm run build:metadata
+RUN pnpm run build:resolver
+RUN pnpm run build:core
+RUN pnpm run build:icons
+RUN pnpm run build:forms
+RUN pnpm run build:themes
+RUN pnpm run build:lib
+RUN pnpm run build:module
 
 # Build showcase
-RUN pnpm --filter showcase build
+RUN pnpm run build:showcase
 
 # Production stage
 FROM node:20-alpine AS runner
